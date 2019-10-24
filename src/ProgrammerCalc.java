@@ -6,7 +6,8 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 {
 	static final long serialVersionUID = 0; // I don't know what this means but JFrame says I need it
 	JButton menuButton;
-	JLabel titleLabel, equationLabel, answerLabel, hexLabel, decLabel, octLabel, binLabel;
+	JLabel titleLabel, equationLabel, answerLabel;
+	JButton hexLabel, decLabel, octLabel, binLabel;
 	JButton placeHolderButton, wordButton, msButton, mButton;
 	JButton lshButton, rshButton, orButton, xOrButton, notButton, andButton;					// row 0
 	JButton secondButton, modButton, clearEButton, clearButton, backButton, divButton;			// row 1
@@ -21,7 +22,10 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	final int DECIMAL = 10;
 	final int OCTAL = 8;
 	final int BINARY = 2;
+	
 	int activeBase = DECIMAL;
+	String currentValue = "0";
+	int runningTotal = 0;
 	boolean beginNewNumber = true;
 	
 	public ProgrammerCalc()
@@ -34,10 +38,10 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		equationLabel = new JLabel("", SwingConstants.RIGHT);
 		answerLabel = new JLabel("0", SwingConstants.RIGHT);
 		
-		hexLabel = new JLabel("HEX  0");
-		decLabel = new JLabel("DEC  0");
-		octLabel = new JLabel("OCT  0");
-		binLabel = new JLabel("BIN  0");
+		hexLabel = new JButton("HEX  0");
+		decLabel = new JButton("DEC  0");
+		octLabel = new JButton("OCT  0");
+		binLabel = new JButton("BIN  0");
 		
 		placeHolderButton = new JButton("Place holder");
 		wordButton = new JButton("WORD");
@@ -223,6 +227,11 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		
 		add(mainPanel, BorderLayout.CENTER);
 		
+		hexLabel.addActionListener(this);
+		decLabel.addActionListener(this);
+		octLabel.addActionListener(this);
+		binLabel.addActionListener(this);
+		
 		num0Button.addActionListener(this);
 		num1Button.addActionListener(this);
 		num2Button.addActionListener(this);
@@ -247,44 +256,44 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	{
 		if(e.getSource() == num0Button)
 		{
-			updateNumber(0);
+			updateNumber("0");
 		}
 		
 		if(e.getSource() == num1Button)
 		{
-			updateNumber(1);
+			updateNumber("1");
 		}
 		
 		if(activeBase >= OCTAL)
 		{
 			if(e.getSource() == num2Button)
 			{
-				updateNumber(2);
+				updateNumber("2");
 			}
 			
 			if(e.getSource() == num3Button)
 			{
-				updateNumber(3);
+				updateNumber("3");
 			}
 			
 			if(e.getSource() == num4Button)
 			{
-				updateNumber(4);
+				updateNumber("4");
 			}
 			
 			if(e.getSource() == num5Button)
 			{
-				updateNumber(5);
+				updateNumber("5");
 			}
 			
 			if(e.getSource() == num6Button)
 			{
-				updateNumber(6);
+				updateNumber("6");
 			}
 			
 			if(e.getSource() == num7Button)
 			{
-				updateNumber(7);
+				updateNumber("7");
 			}
 		}
 		
@@ -292,33 +301,106 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		{
 			if(e.getSource() == num8Button)
 			{
-				updateNumber(8);
+				updateNumber("8");
 			}
 			
 			if(e.getSource() == num9Button)
 			{
-				updateNumber(9);
+				updateNumber("9");
+			}
+		}
+		
+		if(activeBase >= HEXADECIMAL)
+		{
+			if(e.getSource() == numAButton)
+			{
+				updateNumber("a");
+			}
+			
+			if(e.getSource() == numBButton)
+			{
+				updateNumber("b");
+			}
+			
+			if(e.getSource() == numCButton)
+			{
+				updateNumber("c");
+			}
+			
+			if(e.getSource() == numDButton)
+			{
+				updateNumber("d");
+			}
+			
+			if(e.getSource() == numEButton)
+			{
+				updateNumber("e");
+			}
+			
+			if(e.getSource() == numFButton)
+			{
+				updateNumber("f");
 			}
 		}
 		
 		if(e.getSource() == pluseButton)
 		{
 			beginNewNumber = true;
+			equationLabel.setText(equationLabel.getText() + " + ");
+		}
+		
+		if(e.getSource() == hexLabel)
+		{
+			updateBase(HEXADECIMAL);
+		}
+		
+		if(e.getSource() == decLabel)
+		{
+			updateBase(DECIMAL);
+		}
+		
+		if(e.getSource() == octLabel)
+		{
+			updateBase(OCTAL);
+		}
+		
+		if(e.getSource() == binLabel)
+		{
+			updateBase(BINARY);
 		}
 	}
 	
-	public void updateNumber(int num)
+	public void updateNumber(String num)
 	{
 		if(beginNewNumber)
 		{
 			beginNewNumber = false;
-			answerLabel.setText("" + num);
+			currentValue = num;
 		}
 		else
 		{
-			answerLabel.setText(answerLabel.getText() + num);
+			currentValue += num;
 		}
+		
+		answerLabel.setText(currentValue);
+		
+		hexLabel.setText("HEX " + baseConversion(currentValue, activeBase, HEXADECIMAL));
+		decLabel.setText("DEC " + baseConversion(currentValue, activeBase, DECIMAL));
+		octLabel.setText("OCT " + baseConversion(currentValue, activeBase, OCTAL));
+		binLabel.setText("BIN " + baseConversion(currentValue, activeBase, BINARY));
 		equationLabel.setText(equationLabel.getText() + num);
 	}
 	
+	public void updateBase(int newBase)
+	{
+		currentValue = baseConversion(currentValue, activeBase, newBase);
+		answerLabel.setText(currentValue);
+		
+		activeBase = newBase;
+	}
+	
+	public String baseConversion(String value, int fromBase, int toBase)
+	{
+		return Integer.toString(Integer.parseInt(value, fromBase), toBase);
+	}
 }
