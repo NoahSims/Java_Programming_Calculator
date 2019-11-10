@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 
 public class ProgrammerCalc extends JFrame implements ActionListener
 {
@@ -25,7 +26,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	
 	int activeBase = DECIMAL;
 	String currentValue = "0";
-	int runningTotal = 0;
+	ArrayList<String> equation = new ArrayList<String>();
 	boolean beginNewNumber = true;
 	
 	public ProgrammerCalc()
@@ -347,6 +348,8 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		{
 			beginNewNumber = true;
 			equationLabel.setText(equationLabel.getText() + " + ");
+			equation.add(currentValue);
+			equation.add(" + ");
 		}
 		
 		if(e.getSource() == hexLabel)
@@ -395,6 +398,18 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	{
 		currentValue = baseConversion(currentValue, activeBase, newBase);
 		answerLabel.setText(currentValue);
+		
+		equationLabel.setText("");
+		for(int i = 0; i < equation.size(); i++)
+		{
+			System.out.println(equation.get(i));
+			if(Character.isDigit(equation.get(i).charAt(0)))
+			{
+				equation.set(i, baseConversion(equation.get(i), activeBase, newBase));
+			}
+			equationLabel.setText(equationLabel.getText() + equation.get(i));
+		}
+		equationLabel.setText(equationLabel.getText() + currentValue);
 		
 		activeBase = newBase;
 	}
