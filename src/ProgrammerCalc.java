@@ -24,13 +24,17 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	final int OCTAL = 8;
 	final int BINARY = 2;
 	
+	ArrayList<String> displayEquation = new ArrayList<String>();
+	ArrayList<ArrayList<String>> equationList = new ArrayList<ArrayList<String>>();
+	int activeEquation = 0;
 	int activeBase = DECIMAL;
 	String currentValue = "0";
-	ArrayList<String> equation = new ArrayList<String>();
 	boolean beginNewNumber = true;
 	
 	public ProgrammerCalc()
 	{
+		equationList.add(new ArrayList<String>());
+		
 		mainPanel = new JPanel(new GridBagLayout());
 		
 		menuButton = new JButton("menu");
@@ -60,8 +64,8 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		modButton = new JButton("Mod");
 		clearEButton = new JButton("CE");
 		clearButton = new JButton("C");
-		backButton = new JButton("<-");
-		divButton = new JButton("/");
+		backButton = new JButton("\u232b");
+		divButton = new JButton("\u00f7");
 		
 		numAButton = new JButton("A");
 		numBButton = new JButton("B");
@@ -348,8 +352,11 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		{
 			beginNewNumber = true;
 			equationLabel.setText(equationLabel.getText() + " + ");
-			equation.add(currentValue);
-			equation.add(" + ");
+			displayEquation.add(currentValue);
+			displayEquation.add(" + ");
+			equationList.get(activeEquation).add(currentValue);
+			attemptResolve();
+			equationList.get(activeEquation).add("+");
 		}
 		
 		if(e.getSource() == hexLabel)
@@ -400,14 +407,13 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		answerLabel.setText(currentValue);
 		
 		equationLabel.setText("");
-		for(int i = 0; i < equation.size(); i++)
+		for(int i = 0; i < displayEquation.size(); i++)
 		{
-			System.out.println(equation.get(i));
-			if(Character.isDigit(equation.get(i).charAt(0)))
+			if(Character.isDigit(displayEquation.get(i).charAt(0)))
 			{
-				equation.set(i, baseConversion(equation.get(i), activeBase, newBase));
+				displayEquation.set(i, baseConversion(displayEquation.get(i), activeBase, newBase));
 			}
-			equationLabel.setText(equationLabel.getText() + equation.get(i));
+			equationLabel.setText(equationLabel.getText() + displayEquation.get(i));
 		}
 		equationLabel.setText(equationLabel.getText() + currentValue);
 		
@@ -417,5 +423,23 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	public String baseConversion(String value, int fromBase, int toBase)
 	{
 		return Integer.toString(Integer.parseInt(value, fromBase), toBase);
+	}
+	
+	public void attemptResolve()
+	{
+		for(int i = 0; i < equationList.get(activeEquation).size(); i++)
+		{
+			if(equationList.get(activeEquation).get(i) == "+")
+			{
+				int sum = Integer.parseInt(equationList.get(activeEquation).get(i-1), activeBase) + Integer.parseInt(equationList.get(activeEquation).get(i+1), activeBase);
+				equationList.get(activeEquation).remove(i+1);
+				equationList.get(activeEquation).remove(i);
+				equationList.get(activeEquation).remove(i-1);
+				equationList.get(activeEquation).add(i - 1, "" + sum);
+			}
+		}
+		
+		currentValue = equationList.get(activeEquation).get(equationList.get(activeEquation).size() - 1);
+		answerLabel.setText(currentValue);
 	}
 }

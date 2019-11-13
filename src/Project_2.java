@@ -10,3 +10,5 @@ public class Project_2 {
 		window.setVisible(true);
 	}
 }
+
+// make a frame for the shit, set min size
