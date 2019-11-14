@@ -255,6 +255,8 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		numFButton.addActionListener(this);
 		
 		pluseButton.addActionListener(this);
+		minusButton.addActionListener(this);
+		multButton.addActionListener(this);
 	}
 	
 	public void actionPerformed(ActionEvent e)
@@ -348,15 +350,19 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			}
 		}
 		
-		if(e.getSource() == pluseButton)
+		if(e.getSource() == pluseButton && !beginNewNumber)
 		{
-			beginNewNumber = true;
-			equationLabel.setText(equationLabel.getText() + " + ");
-			displayEquation.add(currentValue);
-			displayEquation.add(" + ");
-			equationList.get(activeEquation).add(currentValue);
-			attemptResolve();
-			equationList.get(activeEquation).add("+");
+			performOperation("+");
+		}
+		
+		if(e.getSource() == minusButton && !beginNewNumber)
+		{
+			performOperation("-");
+		}
+		
+		if(e.getSource() == multButton && !beginNewNumber)
+		{
+			performOperation("x");
 		}
 		
 		if(e.getSource() == hexLabel)
@@ -401,6 +407,22 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		equationLabel.setText(equationLabel.getText() + num);
 	}
 	
+	public void performOperation(String op)
+	{
+		beginNewNumber = true;
+		equationLabel.setText(equationLabel.getText() + ' ' + op + ' ');
+		displayEquation.add(currentValue);
+		displayEquation.add( ' ' + op + ' ');
+		equationList.get(activeEquation).add(baseConversion(currentValue, activeBase, DECIMAL));
+		attemptResolve();
+		equationList.get(activeEquation).add(op);
+	}
+	
+	public void higherOrderOperation()
+	{
+		activeEquation++;
+	}
+	
 	public void updateBase(int newBase)
 	{
 		currentValue = baseConversion(currentValue, activeBase, newBase);
@@ -415,7 +437,11 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			}
 			equationLabel.setText(equationLabel.getText() + displayEquation.get(i));
 		}
-		equationLabel.setText(equationLabel.getText() + currentValue);
+		
+		if(!beginNewNumber)
+		{
+			equationLabel.setText(equationLabel.getText() + currentValue);
+		}
 		
 		activeBase = newBase;
 	}
@@ -429,17 +455,29 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	{
 		for(int i = 0; i < equationList.get(activeEquation).size(); i++)
 		{
+			int result;
 			if(equationList.get(activeEquation).get(i) == "+")
 			{
-				int sum = Integer.parseInt(equationList.get(activeEquation).get(i-1), activeBase) + Integer.parseInt(equationList.get(activeEquation).get(i+1), activeBase);
-				equationList.get(activeEquation).remove(i+1);
-				equationList.get(activeEquation).remove(i);
-				equationList.get(activeEquation).remove(i-1);
-				equationList.get(activeEquation).add(i - 1, "" + sum);
+				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) + Integer.parseInt(equationList.get(activeEquation).get(i+1));
 			}
+			else if(equationList.get(activeEquation).get(i) == "-")
+			{
+				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) - Integer.parseInt(equationList.get(activeEquation).get(i+1));
+			}
+			else if(equationList.get(activeEquation).get(i) == "x")
+			{
+				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) * Integer.parseInt(equationList.get(activeEquation).get(i+1));
+			}
+			else
+			{
+				continue;
+			}
+			equationList.get(activeEquation).remove(i+1);
+			equationList.get(activeEquation).remove(i);
+			equationList.get(activeEquation).set(i - 1, "" + result);
 		}
 		
-		currentValue = equationList.get(activeEquation).get(equationList.get(activeEquation).size() - 1);
+		currentValue = baseConversion(equationList.get(activeEquation).get(equationList.get(activeEquation).size() - 1), DECIMAL, activeBase);
 		answerLabel.setText(currentValue);
 	}
 }
