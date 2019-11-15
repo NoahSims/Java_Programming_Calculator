@@ -261,6 +261,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		divButton.addActionListener(this);
 		openParButton.addActionListener(this);
 		closeParButton.addActionListener(this);
+		equalButton.addActionListener(this);
 	}
 	
 	public void actionPerformed(ActionEvent e)
@@ -396,6 +397,20 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			resolveEquation();
 		}
 		
+		if(e.getSource() == equalButton && !beginNewNumber)
+		{
+			while(activeEquation > 0 || equationList.get(activeEquation).size() > 1)
+			{
+				closeParenthesis = true;
+				resolveEquation();
+			}
+			equationLabel.setText("");
+			displayEquation.clear();
+			equationList.clear();
+			equationList.add(new ArrayList<String>());
+			beginNewNumber = true;
+		}
+		
 		if(e.getSource() == hexLabel)
 		{
 			updateBase(HEXADECIMAL);
@@ -441,9 +456,13 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	public void performOperation(String op)
 	{
 		beginNewNumber = true;
-		equationLabel.setText(equationLabel.getText() + currentValue + ' ' + op + ' ');
-		displayEquation.add(currentValue);
-		displayEquation.add( ' ' + op + ' ');
+		if(displayEquation.size() == 0 || (displayEquation.size() > 1 && displayEquation.get(displayEquation.size() - 1) != ")"))
+		{
+			equationLabel.setText(equationLabel.getText() + currentValue);
+			displayEquation.add(currentValue);
+		}
+		equationLabel.setText(equationLabel.getText() + ' ' + op + ' ');
+		displayEquation.add(' ' + op + ' ');
 		equationList.get(activeEquation).add(baseConversion(currentValue, activeBase, DECIMAL));
 		resolveEquation();
 		equationList.get(activeEquation).add(op);
@@ -482,36 +501,6 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	{
 		return Integer.toString(Integer.parseInt(value, fromBase), toBase);
 	}
-	
-//	public void attemptResolve()
-//	{
-//		for(int i = 0; i < equationList.get(activeEquation).size(); i++)
-//		{
-//			int result;
-//			if(equationList.get(activeEquation).get(i) == "+")
-//			{
-//				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) + Integer.parseInt(equationList.get(activeEquation).get(i+1));
-//			}
-//			else if(equationList.get(activeEquation).get(i) == "-")
-//			{
-//				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) - Integer.parseInt(equationList.get(activeEquation).get(i+1));
-//			}
-//			else if(equationList.get(activeEquation).get(i) == "x")
-//			{
-//				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) * Integer.parseInt(equationList.get(activeEquation).get(i+1));
-//			}
-//			else
-//			{
-//				continue;
-//			}
-//			equationList.get(activeEquation).remove(i+1);
-//			equationList.get(activeEquation).remove(i);
-//			equationList.get(activeEquation).set(i - 1, "" + result);
-//		}
-//		
-//		currentValue = baseConversion(equationList.get(activeEquation).get(equationList.get(activeEquation).size() - 1), DECIMAL, activeBase);
-//		answerLabel.setText(currentValue);
-//	}
 	
 	public void resolveEquation()
 	{
