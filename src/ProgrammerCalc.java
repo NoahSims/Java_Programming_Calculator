@@ -399,6 +399,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		
 		if(e.getSource() == equalButton && !beginNewNumber)
 		{
+			equationList.get(activeEquation).add(baseConversion(currentValue, activeBase, DECIMAL));
 			while(activeEquation > 0 || equationList.get(activeEquation).size() > 1)
 			{
 				closeParenthesis = true;
@@ -536,7 +537,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			
 			i--;
 			
-			if(closeParenthesis && equationList.get(activeEquation - 1).size() > 0 && equationList.get(activeEquation - 1).get(equationList.get(activeEquation - 1).size() - 1) == "(")
+			if(closeParenthesis && activeEquation > 0 && equationList.get(activeEquation - 1).size() > 0 && equationList.get(activeEquation - 1).get(equationList.get(activeEquation - 1).size() - 1) == "(")
 			{
 				equationList.get(activeEquation - 1).remove(equationList.get(activeEquation - 1).size() - 1);
 				closeParenthesis = false;
