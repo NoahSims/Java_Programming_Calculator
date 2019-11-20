@@ -31,6 +31,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	String currentValue = "0";
 	boolean beginNewNumber = true;
 	boolean closeParenthesis = false;
+	boolean afterEqualButtonPressed = false;
 	
 	public ProgrammerCalc()
 	{
@@ -355,23 +356,23 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			}
 		}
 		
-		if(e.getSource() == pluseButton && !beginNewNumber)
+		if(e.getSource() == pluseButton && (!beginNewNumber || afterEqualButtonPressed == true))
 		{
 			performOperation("+");
 		}
 		
-		if(e.getSource() == minusButton && !beginNewNumber)
+		if(e.getSource() == minusButton && (!beginNewNumber || afterEqualButtonPressed == true))
 		{
 			performOperation("-");
 		}
 		
-		if(e.getSource() == multButton && !beginNewNumber)
+		if(e.getSource() == multButton && (!beginNewNumber || afterEqualButtonPressed == true))
 		{
 			higherOrderOperation();
 			performOperation("x");
 		}
 		
-		if(e.getSource() == divButton && !beginNewNumber)
+		if(e.getSource() == divButton && (!beginNewNumber || afterEqualButtonPressed == true))
 		{
 			higherOrderOperation();
 			performOperation("\u00f7");
@@ -405,11 +406,16 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 				closeParenthesis = true;
 				resolveEquation();
 			}
+			hexLabel.setText("HEX " + baseConversion(currentValue, activeBase, HEXADECIMAL));
+			decLabel.setText("DEC " + baseConversion(currentValue, activeBase, DECIMAL));
+			octLabel.setText("OCT " + baseConversion(currentValue, activeBase, OCTAL));
+			binLabel.setText("BIN " + baseConversion(currentValue, activeBase, BINARY));
 			equationLabel.setText("");
 			displayEquation.clear();
 			equationList.clear();
 			equationList.add(new ArrayList<String>());
 			beginNewNumber = true;
+			afterEqualButtonPressed = true;
 		}
 		
 		if(e.getSource() == hexLabel)
@@ -457,6 +463,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	public void performOperation(String op)
 	{
 		beginNewNumber = true;
+		afterEqualButtonPressed = false;
 		if(displayEquation.size() == 0 || (displayEquation.size() > 1 && displayEquation.get(displayEquation.size() - 1) != ")"))
 		{
 			equationLabel.setText(equationLabel.getText() + currentValue);
