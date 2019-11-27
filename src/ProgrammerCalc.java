@@ -28,10 +28,12 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	ArrayList<ArrayList<String>> equationList = new ArrayList<ArrayList<String>>();
 	int activeEquation = 0;
 	int activeBase = DECIMAL;
+	int numOpenPar = 0;
 	String currentValue = "0";
 	boolean beginNewNumber = true;
 	boolean closeParenthesis = false;
 	boolean afterEqualButtonPressed = false;
+	boolean numberInserted = false;
 	
 	public ProgrammerCalc()
 	{
@@ -385,17 +387,28 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			
 			displayEquation.add("(");
 			equationLabel.setText(equationLabel.getText() + "(");
+			numOpenPar++;
 		}
 		
-		if(e.getSource() == closeParButton && activeEquation > 0 && !beginNewNumber)
+		if(e.getSource() == closeParButton && numOpenPar > 0 && !beginNewNumber)
 		{
-			displayEquation.add(currentValue);
-			displayEquation.add(")");
-			equationLabel.setText(equationLabel.getText() + currentValue + ")");
+			if(numberInserted)
+			{
+				displayEquation.add(currentValue);
+				equationLabel.setText(equationLabel.getText() + currentValue);
+				equationList.get(activeEquation).add(baseConversion(currentValue, activeBase, DECIMAL));
+				
+				numberInserted = false;
+			}
 			
-			equationList.get(activeEquation).add(baseConversion(currentValue, activeBase, DECIMAL));
+			displayEquation.add(")");
+			equationLabel.setText(equationLabel.getText() + ")");
+			
+			
 			closeParenthesis = true;
 			resolveEquation();
+			
+			numOpenPar--;
 		}
 		
 		if(e.getSource() == equalButton && !beginNewNumber)
@@ -458,6 +471,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		octLabel.setText("OCT " + baseConversion(currentValue, activeBase, OCTAL));
 		binLabel.setText("BIN " + baseConversion(currentValue, activeBase, BINARY));
 		
+		numberInserted = true;
 	}
 	
 	public void performOperation(String op)
@@ -516,6 +530,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		while(i < equationList.get(activeEquation).size())
 		{
 			int result;
+			
 			if(equationList.get(activeEquation).get(i) == "x")
 			{
 				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) * Integer.parseInt(equationList.get(activeEquation).get(i+1));
@@ -556,9 +571,17 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 				activeEquation--;
 				equationList.get(activeEquation).add("" + result);
 			}
-			
-			
+		} // end while
+		
+		if(closeParenthesis && activeEquation > 0 && equationList.get(activeEquation).size() == 1 && equationList.get(activeEquation - 1).size() > 0 && equationList.get(activeEquation - 1).get(equationList.get(activeEquation - 1).size() - 1) == "(")
+		{
+			String temp = equationList.get(activeEquation).get(0);
+			equationList.remove(activeEquation);
+			activeEquation--;
+			equationList.get(activeEquation).remove(equationList.get(activeEquation).size()-1);
+			equationList.get(activeEquation).add(temp);
 		}
+		
 		currentValue = baseConversion(equationList.get(activeEquation).get(equationList.get(activeEquation).size() - 1), DECIMAL, activeBase);
 		answerLabel.setText(currentValue);
 	}
