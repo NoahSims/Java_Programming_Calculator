@@ -358,23 +358,23 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			}
 		}
 		
-		if(e.getSource() == pluseButton && (!beginNewNumber || afterEqualButtonPressed == true))
+		if(e.getSource() == pluseButton && (!beginNewNumber || afterEqualButtonPressed))
 		{
 			performOperation("+");
 		}
 		
-		if(e.getSource() == minusButton && (!beginNewNumber || afterEqualButtonPressed == true))
+		if(e.getSource() == minusButton && (!beginNewNumber || afterEqualButtonPressed))
 		{
 			performOperation("-");
 		}
 		
-		if(e.getSource() == multButton && (!beginNewNumber || afterEqualButtonPressed == true))
+		if(e.getSource() == multButton && (!beginNewNumber || afterEqualButtonPressed))
 		{
 			higherOrderOperation();
 			performOperation("x");
 		}
 		
-		if(e.getSource() == divButton && (!beginNewNumber || afterEqualButtonPressed == true))
+		if(e.getSource() == divButton && (!beginNewNumber || afterEqualButtonPressed))
 		{
 			higherOrderOperation();
 			performOperation("\u00f7");
@@ -403,7 +403,6 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			
 			displayEquation.add(")");
 			equationLabel.setText(equationLabel.getText() + ")");
-			
 			
 			closeParenthesis = true;
 			resolveEquation();
@@ -478,14 +477,19 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	{
 		beginNewNumber = true;
 		afterEqualButtonPressed = false;
-		if(displayEquation.size() == 0 || (displayEquation.size() > 1 && displayEquation.get(displayEquation.size() - 1) != ")"))
+		if(displayEquation.size() == 0 || (displayEquation.size() > 0 && displayEquation.get(displayEquation.size() - 1) != ")"))
 		{
 			equationLabel.setText(equationLabel.getText() + currentValue);
 			displayEquation.add(currentValue);
+			equationList.get(activeEquation).add(baseConversion(currentValue, activeBase, DECIMAL));
+		}
+		if((op == "x" || op == "\u00f7") && displayEquation.size() > 0 && displayEquation.get(displayEquation.size() - 1) == ")")
+		{
+			equationList.get(activeEquation - 1).remove(equationList.get(activeEquation - 1).size() - 1);
+			equationList.get(activeEquation).add(currentValue);
 		}
 		equationLabel.setText(equationLabel.getText() + ' ' + op + ' ');
 		displayEquation.add(' ' + op + ' ');
-		equationList.get(activeEquation).add(baseConversion(currentValue, activeBase, DECIMAL));
 		resolveEquation();
 		equationList.get(activeEquation).add(op);
 	}
