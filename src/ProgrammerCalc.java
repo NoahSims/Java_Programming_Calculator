@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.math.*;
 
 public class ProgrammerCalc extends JFrame implements ActionListener
 {
@@ -24,12 +25,12 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	final int OCTAL = 8;
 	final int BINARY = 2;
 	
-	final int BYTE_SIZE = 127;
-	final int WORD_SIZE = 32767;
-	final long DWORD_SIZE = 2147483647L;
-	final long QWORD_SIZE = 9223372036854775807L;
+	final int BYTE_SIZE = 8;
+	final int WORD_SIZE = 16;
+	final int DWORD_SIZE = 32;
+	final int QWORD_SIZE = 64;
 	
-	long activeDataSize = 9223372036854775807L;
+	int activeDataSize = QWORD_SIZE;
 	
 	ArrayList<String> displayEquation = new ArrayList<String>();
 	ArrayList<ArrayList<String>> equationList = new ArrayList<ArrayList<String>>();
@@ -439,10 +440,6 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 				closeParenthesis = true;
 				resolveEquation();
 			}
-			hexLabel.setText("HEX " + baseConversion(currentValue, activeBase, HEXADECIMAL));
-			decLabel.setText("DEC " + baseConversion(currentValue, activeBase, DECIMAL));
-			octLabel.setText("OCT " + baseConversion(currentValue, activeBase, OCTAL));
-			binLabel.setText("BIN " + baseConversion(currentValue, activeBase, BINARY));
 			equationLabel.setText("");
 			displayEquation.clear();
 			equationList.clear();
@@ -577,12 +574,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		{
 			currentValue = tempValue;
 			
-			answerLabel.setText(currentValue);
-		
-			hexLabel.setText("HEX " + baseConversion(currentValue, activeBase, HEXADECIMAL));
-			decLabel.setText("DEC " + baseConversion(currentValue, activeBase, DECIMAL));
-			octLabel.setText("OCT " + baseConversion(currentValue, activeBase, OCTAL));
-			binLabel.setText("BIN " + baseConversion(currentValue, activeBase, BINARY));
+			displayValue(currentValue);
 		
 			numberInserted = true;
 		}
@@ -710,32 +702,107 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			equationList.get(activeEquation).add(temp);
 		}
 		
-		currentValue = baseConversion(equationList.get(activeEquation).get(equationList.get(activeEquation).size() - 1), DECIMAL, activeBase);
-		answerLabel.setText(dataSizeOverflow(currentValue));
-	}
+		currentValue = dataSizeOverflow(baseConversion(equationList.get(activeEquation).get(equationList.get(activeEquation).size() - 1), DECIMAL, activeBase));
+		displayValue(currentValue);
+	} // end resolveEquation
 	
 	public boolean isWithinDataSize(String value)
 	{
-		String decimalValue = baseConversion(value, activeBase, DECIMAL);
-		return (Long.parseLong(decimalValue) <= activeDataSize && Long.parseLong(decimalValue) >= (-1) * (activeDataSize + 1));
-	}
+		BigInteger maxDataSize = BigInteger.valueOf(2).pow(activeDataSize - 1);
+		BigInteger num = new BigInteger(value, activeBase);
+		return (num.compareTo(maxDataSize) == -1 && num.compareTo(maxDataSize.multiply(BigInteger.valueOf(-1))) > -1);
+	} // end isWithinDataSize
 	
 	public String dataSizeOverflow(String value)
 	{
-		if(isWithinDataSize(value) || activeDataSize == QWORD_SIZE)
+		if(isWithinDataSize(value))
 			return value;
 		
-		long decimalValue = Long.parseLong(baseConversion(value, activeBase, DECIMAL));
-		decimalValue = decimalValue % ((activeDataSize + 1) * 2);
-		if(decimalValue > activeDataSize)
+		BigInteger maxDataSize = BigInteger.valueOf(2).pow(activeDataSize - 1);
+		BigInteger num = new BigInteger(value, activeBase);
+		
+		num = num.mod(maxDataSize.multiply(BigInteger.valueOf(2)));
+		
+		if(num.compareTo(maxDataSize) != -1)
 		{
-			decimalValue -= ((activeDataSize + 1) * 2);
+			num = num.subtract(maxDataSize.multiply(BigInteger.valueOf(2)));
 		}
-		else if(decimalValue < (-1) * (activeDataSize + 1))
+		else if(num.compareTo(maxDataSize.multiply(BigInteger.valueOf(-1))) == -1)
 		{
-			decimalValue += ((activeDataSize + 1) * 2);
+			num = num.add(maxDataSize.multiply(BigInteger.valueOf(2)));
 		}
 		
-		return baseConversion("" + decimalValue, DECIMAL, activeBase);
+		return num.toString(activeBase);
+	} // end dataSizeOverflow
+	
+	public void displayValue(String value)
+	{
+		answerLabel.setText(formatForDisplay(value, activeBase));
+		hexLabel.setText("HEX " + formatForDisplay(value, HEXADECIMAL));
+		decLabel.setText("DEC " + formatForDisplay(value, DECIMAL));
+		octLabel.setText("OCT " + formatForDisplay(value, OCTAL));
+		binLabel.setText("BIN " + formatForDisplay(value, BINARY));
+	}
+	
+	public String formatForDisplay(String value, int toBase)
+	{
+		value = baseConversion(value, activeBase, toBase);
+		String negate = "";
+		if(Long.parseLong(value, toBase) < 0)
+		{
+			value = value.substring(1);
+			negate = "-";
+		}
+		
+		if(toBase == DECIMAL)
+		{
+			int commaOffset = value.length() % 3;
+			for(int i = value.length() - 1; i > 0; i--)
+			{
+				if(i % 3 == commaOffset)
+					value = value.substring(0,i) + "," + value.substring(i);
+			}
+			value = negate + value;
+		}
+		else if(toBase == HEXADECIMAL || toBase == BINARY)
+		{
+			if(negate == "-")
+			{
+				BigInteger unsignedLong = new BigInteger("0");
+				unsignedLong = unsignedLong.add(BigInteger.valueOf(2).pow(activeDataSize));
+				unsignedLong = unsignedLong.subtract(new BigInteger(value, toBase));
+				value = unsignedLong.toString(toBase);
+			}
+			
+			int spaceOffset = value.length() % 4;
+			for(int i = value.length() - 1; i > 0; i--)
+			{
+				if(i % 4 == spaceOffset)
+					value = value.substring(0,i) + " " + value.substring(i);
+			}
+			
+			value = value.toUpperCase();
+		}
+		else if(toBase == OCTAL)
+		{
+			if(negate == "-")
+			{
+				BigInteger unsignedLong = new BigInteger("0");
+				unsignedLong = unsignedLong.add(BigInteger.valueOf(2).pow(activeDataSize));
+				unsignedLong = unsignedLong.subtract(new BigInteger(value, toBase));
+				value = unsignedLong.toString(toBase);
+			}
+			
+			int spaceOffset = value.length() % 3;
+			for(int i = value.length() - 1; i > 0; i--)
+			{
+				if(i % 3 == spaceOffset)
+					value = value.substring(0,i) + " " + value.substring(i);
+			}
+			
+			value = value.toUpperCase();
+		}
+		
+		return value;
 	}
 }
