@@ -24,6 +24,13 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	final int OCTAL = 8;
 	final int BINARY = 2;
 	
+	final int BYTE_SIZE = 127;
+	final int WORD_SIZE = 32767;
+	final long DWORD_SIZE = 2147483647L;
+	final long QWORD_SIZE = 9223372036854775807L;
+	
+	long activeDataSize = 9223372036854775807L;
+	
 	ArrayList<String> displayEquation = new ArrayList<String>();
 	ArrayList<ArrayList<String>> equationList = new ArrayList<ArrayList<String>>();
 	int activeEquation = 0;
@@ -34,6 +41,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	boolean closeParenthesis = false;
 	boolean afterEqualButtonPressed = false;
 	boolean numberInserted = false;
+	boolean secondButtonToggle = false;
 	
 	public ProgrammerCalc()
 	{
@@ -53,7 +61,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		binLabel = new JButton("BIN  0");
 		
 		placeHolderButton = new JButton("Place holder");
-		wordButton = new JButton("WORD");
+		wordButton = new JButton("QWORD");
 		msButton = new JButton("MS");
 		mButton = new JButton("M");
 		
@@ -262,9 +270,16 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		minusButton.addActionListener(this);
 		multButton.addActionListener(this);
 		divButton.addActionListener(this);
+		modButton.addActionListener(this);
 		openParButton.addActionListener(this);
 		closeParButton.addActionListener(this);
 		equalButton.addActionListener(this);
+		backButton.addActionListener(this);
+		clearButton.addActionListener(this);
+		clearEButton.addActionListener(this);
+		signButton.addActionListener(this);
+		wordButton.addActionListener(this);
+		secondButton.addActionListener(this);
 	}
 	
 	public void actionPerformed(ActionEvent e)
@@ -329,32 +344,32 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		{
 			if(e.getSource() == numAButton)
 			{
-				updateNumber("a");
+				updateNumber("A");
 			}
 			
 			if(e.getSource() == numBButton)
 			{
-				updateNumber("b");
+				updateNumber("B");
 			}
 			
 			if(e.getSource() == numCButton)
 			{
-				updateNumber("c");
+				updateNumber("C");
 			}
 			
 			if(e.getSource() == numDButton)
 			{
-				updateNumber("d");
+				updateNumber("D");
 			}
 			
 			if(e.getSource() == numEButton)
 			{
-				updateNumber("e");
+				updateNumber("E");
 			}
 			
 			if(e.getSource() == numFButton)
 			{
-				updateNumber("f");
+				updateNumber("F");
 			}
 		}
 		
@@ -378,6 +393,12 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		{
 			higherOrderOperation();
 			performOperation("\u00f7");
+		}
+		
+		if(e.getSource() == modButton && (!beginNewNumber || afterEqualButtonPressed))
+		{
+			higherOrderOperation();
+			performOperation("Mod");
 		}
 		
 		if(e.getSource() == openParButton)
@@ -430,6 +451,78 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			afterEqualButtonPressed = true;
 		}
 		
+		if(e.getSource() == backButton && !beginNewNumber)
+		{
+			String temp = currentValue.substring(0, currentValue.length() - 1);
+			if(temp.length() == 0)
+			{
+				temp = "0";
+			}
+			
+			beginNewNumber = true;
+			updateNumber(temp);
+			
+			if(currentValue == "0")
+				beginNewNumber = true;
+		}
+		
+		if(e.getSource() == clearEButton && !beginNewNumber)
+		{
+			beginNewNumber = true;
+			updateNumber("0");
+			
+			beginNewNumber = true;
+		}
+		
+		if(e.getSource() == clearButton)
+		{
+			beginNewNumber = true;
+			updateNumber("0");
+			
+			equationLabel.setText("");
+			displayEquation.clear();
+			equationList.clear();
+			equationList.add(new ArrayList<String>());
+			beginNewNumber = true;
+			activeEquation = 0;
+			numOpenPar = 0;
+			closeParenthesis = false;
+			afterEqualButtonPressed = false;
+			numberInserted = false;
+		}
+		
+		if(e.getSource() == signButton && !beginNewNumber)
+		{
+			long temp = Long.parseLong(baseConversion(currentValue, activeBase, DECIMAL));
+			temp = 0 - temp;
+			beginNewNumber = true;
+			updateNumber(baseConversion("" + temp, DECIMAL, activeBase));
+		}
+		
+		if(e.getSource() == wordButton)
+		{
+			if(activeDataSize == QWORD_SIZE)
+			{
+				activeDataSize = DWORD_SIZE;
+				wordButton.setText("DWORD");
+			}
+			else if(activeDataSize == DWORD_SIZE)
+			{
+				activeDataSize = WORD_SIZE;
+				wordButton.setText("WORD");
+			}
+			else if(activeDataSize == WORD_SIZE)
+			{
+				activeDataSize = BYTE_SIZE;
+				wordButton.setText("BYTE");
+			}
+			else
+			{
+				activeDataSize = QWORD_SIZE;
+				wordButton.setText("QWORD");
+			}
+		}
+		
 		if(e.getSource() == hexLabel)
 		{
 			updateBase(HEXADECIMAL);
@@ -449,28 +542,50 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		{
 			updateBase(BINARY);
 		}
+		
+		if(e.getSource() == secondButton)
+		{
+			if(!secondButtonToggle)
+			{
+				secondButtonToggle = true;
+				lshButton.setText("RoL");
+				rshButton.setText("RoR");
+			}
+			else
+			{
+				secondButtonToggle = false;
+				lshButton.setText("Lsh");
+				rshButton.setText("Rsh");
+			}
+		}
 	}
 	
 	public void updateNumber(String num)
 	{
+		String tempValue;
 		if(beginNewNumber)
 		{
 			beginNewNumber = false;
-			currentValue = num;
+			tempValue = num;
 		}
 		else
 		{
-			currentValue += num;
+			tempValue = currentValue + num;
 		}
 		
-		answerLabel.setText(currentValue);
+		if(isWithinDataSize(tempValue))
+		{
+			currentValue = tempValue;
+			
+			answerLabel.setText(currentValue);
 		
-		hexLabel.setText("HEX " + baseConversion(currentValue, activeBase, HEXADECIMAL));
-		decLabel.setText("DEC " + baseConversion(currentValue, activeBase, DECIMAL));
-		octLabel.setText("OCT " + baseConversion(currentValue, activeBase, OCTAL));
-		binLabel.setText("BIN " + baseConversion(currentValue, activeBase, BINARY));
+			hexLabel.setText("HEX " + baseConversion(currentValue, activeBase, HEXADECIMAL));
+			decLabel.setText("DEC " + baseConversion(currentValue, activeBase, DECIMAL));
+			octLabel.setText("OCT " + baseConversion(currentValue, activeBase, OCTAL));
+			binLabel.setText("BIN " + baseConversion(currentValue, activeBase, BINARY));
 		
-		numberInserted = true;
+			numberInserted = true;
+		}
 	}
 	
 	public void performOperation(String op)
@@ -503,14 +618,15 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	public void updateBase(int newBase)
 	{
 		currentValue = baseConversion(currentValue, activeBase, newBase);
-		answerLabel.setText(currentValue);
+		answerLabel.setText(dataSizeOverflow(currentValue));
 		
 		equationLabel.setText("");
 		for(int i = 0; i < displayEquation.size(); i++)
 		{
-			if(Character.isDigit(displayEquation.get(i).charAt(0)))
+			try
 			{
 				displayEquation.set(i, baseConversion(displayEquation.get(i), activeBase, newBase));
+			}catch(Exception e) {
 			}
 			equationLabel.setText(equationLabel.getText() + displayEquation.get(i));
 		}
@@ -525,7 +641,11 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	
 	public String baseConversion(String value, int fromBase, int toBase)
 	{
-		return Integer.toString(Integer.parseInt(value, fromBase), toBase);
+		if(fromBase == toBase)
+		{
+			return value;
+		}
+		return Long.toString(Long.parseLong(value, fromBase), toBase).toUpperCase();
 	}
 	
 	public void resolveEquation()
@@ -533,23 +653,27 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		int i = 0;
 		while(i < equationList.get(activeEquation).size())
 		{
-			int result;
+			Long result;
 			
 			if(equationList.get(activeEquation).get(i) == "x")
 			{
-				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) * Integer.parseInt(equationList.get(activeEquation).get(i+1));
+				result = Long.parseLong(equationList.get(activeEquation).get(i-1)) * Long.parseLong(equationList.get(activeEquation).get(i+1));
 			}
 			else if(equationList.get(activeEquation).get(i) == "\u00f7")
 			{
-				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) / Integer.parseInt(equationList.get(activeEquation).get(i+1));
+				result = Long.parseLong(equationList.get(activeEquation).get(i-1)) / Long.parseLong(equationList.get(activeEquation).get(i+1));
+			}
+			else if(equationList.get(activeEquation).get(i) == "Mod")
+			{
+				result = Long.parseLong(equationList.get(activeEquation).get(i-1)) % Long.parseLong(equationList.get(activeEquation).get(i+1));
 			}
 			else if(equationList.get(activeEquation).get(i) == "+")
 			{
-				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) + Integer.parseInt(equationList.get(activeEquation).get(i+1));
+				result = Long.parseLong(equationList.get(activeEquation).get(i-1)) + Long.parseLong(equationList.get(activeEquation).get(i+1));
 			}
 			else if(equationList.get(activeEquation).get(i) == "-")
 			{
-				result = Integer.parseInt(equationList.get(activeEquation).get(i-1)) - Integer.parseInt(equationList.get(activeEquation).get(i+1));
+				result = Long.parseLong(equationList.get(activeEquation).get(i-1)) - Long.parseLong(equationList.get(activeEquation).get(i+1));
 			}
 			else
 			{
@@ -587,6 +711,31 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		}
 		
 		currentValue = baseConversion(equationList.get(activeEquation).get(equationList.get(activeEquation).size() - 1), DECIMAL, activeBase);
-		answerLabel.setText(currentValue);
+		answerLabel.setText(dataSizeOverflow(currentValue));
+	}
+	
+	public boolean isWithinDataSize(String value)
+	{
+		String decimalValue = baseConversion(value, activeBase, DECIMAL);
+		return (Long.parseLong(decimalValue) <= activeDataSize && Long.parseLong(decimalValue) >= (-1) * (activeDataSize + 1));
+	}
+	
+	public String dataSizeOverflow(String value)
+	{
+		if(isWithinDataSize(value) || activeDataSize == QWORD_SIZE)
+			return value;
+		
+		long decimalValue = Long.parseLong(baseConversion(value, activeBase, DECIMAL));
+		decimalValue = decimalValue % ((activeDataSize + 1) * 2);
+		if(decimalValue > activeDataSize)
+		{
+			decimalValue -= ((activeDataSize + 1) * 2);
+		}
+		else if(decimalValue < (-1) * (activeDataSize + 1))
+		{
+			decimalValue += ((activeDataSize + 1) * 2);
+		}
+		
+		return baseConversion("" + decimalValue, DECIMAL, activeBase);
 	}
 }
