@@ -1,15 +1,23 @@
+/* Author:     Noah Sims
+ * Program:    Semester Project 2 - Windows 10 Programmer Calculator
+ * Date:	   12/1/2019
+ * Comments:
+ * 		This program replicates the functionality of the Windows 10 Programmer Calculator using java swing
+ * 		elements.
+ */
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.math.*;
 
-public class ProgrammerCalc extends JFrame implements ActionListener
+public class ProgrammerCalc extends JFrame implements ActionListener, MouseListener
 {
 	static final long serialVersionUID = 0; // I don't know what this means but JFrame says I need it
 	JButton menuButton;
 	JLabel titleLabel, equationLabel, answerLabel;
-	JButton hexLabel, decLabel, octLabel, binLabel;
+	JButton hexButton, decButton, octButton, binButton;
 	JButton placeHolderButton, wordButton, msButton, mButton;
 	JButton lshButton, rshButton, orButton, xOrButton, notButton, andButton;					// row 0
 	JButton secondButton, modButton, clearEButton, clearButton, backButton, divButton;			// row 1
@@ -46,9 +54,27 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	
 	public ProgrammerCalc()
 	{
+//		 try {
+//	            // Windows LF
+//	            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+//	        } catch (Exception e) {
+//	            try {
+//	                // Linux LF
+//	                UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+//	            } catch (Exception f) {
+//	                // Mac LF
+//	                try {
+//	                    UIManager.setLookAndFeel("javax.swing.plaf.mac.MacLookAndFeel ");
+//	                } catch (Exception g) {
+//	                    // Let java set its default
+//	                }
+//	            }
+//	        }
+		
 		equationList.add(new ArrayList<String>());
 		
 		mainPanel = new JPanel(new GridBagLayout());
+		mainPanel.setBackground(new Color(70, 70, 70));
 		
 		menuButton = new JButton("menu");
 		titleLabel = new JLabel("Programmer");
@@ -56,10 +82,10 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		equationLabel = new JLabel("", SwingConstants.RIGHT);
 		answerLabel = new JLabel("0", SwingConstants.RIGHT);
 		
-		hexLabel = new JButton("HEX  0");
-		decLabel = new JButton("DEC  0");
-		octLabel = new JButton("OCT  0");
-		binLabel = new JButton("BIN  0");
+		hexButton = new JButton("HEX  0");
+		decButton = new JButton("DEC  0");
+		octButton = new JButton("OCT  0");
+		binButton = new JButton("BIN   0");
 		
 		placeHolderButton = new JButton("Place holder");
 		wordButton = new JButton("QWORD");
@@ -117,138 +143,223 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		c.weightx = 1;
 		c.weighty = .3;
 		mainPanel.add(menuButton, c);
+		menuButton.setFocusPainted(false);
+		menuButton.setContentAreaFilled(false);
+		menuButton.setBorderPainted(false);
+		menuButton.setOpaque(false);
+		menuButton.setForeground(Color.white);
+		menuButton.setBackground(Color.gray);
 		c.gridwidth = 6;
 		c.gridx = 1;
 		mainPanel.add(titleLabel, c);
+		titleLabel.setForeground(Color.white);
 		
 		c.gridy = 1;
 		c.insets = new Insets(0, 0, 0, 10);
 		mainPanel.add(equationLabel, c);
+		equationLabel.setForeground(Color.white);
 		
 		c.gridy = 2;
 		c.gridx = 0;
 		c.weighty = 1;
 		c.gridwidth = 7;
 		mainPanel.add(answerLabel, c);
+		answerLabel.setForeground(Color.white);
 		
 		c.gridy = 3;
 		c.ipady = 0;
 		c.weighty = .2;
 		c.insets = new Insets(0, 0, 0, 0);
-		mainPanel.add(hexLabel, c);
+		mainPanel.add(hexButton, c);
+		hexButton.setFocusPainted(false);
+        hexButton.setContentAreaFilled(false);
+        hexButton.setBorderPainted(false);
+        hexButton.setOpaque(false);
+        hexButton.setForeground(Color.white);
+        hexButton.setBackground(Color.gray);
+        hexButton.setHorizontalAlignment(SwingConstants.LEFT);
 		
 		c.gridy = 4;
-		mainPanel.add(decLabel, c);
+		mainPanel.add(decButton, c);
+		decButton.setFocusPainted(false);
+		decButton.setContentAreaFilled(false);
+		decButton.setBorderPainted(false);
+		decButton.setOpaque(false);
+		decButton.setForeground(Color.white);
+		decButton.setBackground(Color.gray);
+		decButton.setHorizontalAlignment(SwingConstants.LEFT);
 		
 		c.gridy = 5;
-		mainPanel.add(octLabel, c);
+		mainPanel.add(octButton, c);
+		octButton.setFocusPainted(false);
+		octButton.setContentAreaFilled(false);
+		octButton.setBorderPainted(false);
+		octButton.setOpaque(false);
+		octButton.setForeground(Color.white);
+		octButton.setBackground(Color.gray);
+		octButton.setHorizontalAlignment(SwingConstants.LEFT);
 		
 		c.gridy = 6;
-		mainPanel.add(binLabel, c);
+		mainPanel.add(binButton, c);
+		binButton.setFocusPainted(false);
+		binButton.setContentAreaFilled(false);
+		binButton.setBorderPainted(false);
+		binButton.setOpaque(false);
+		binButton.setForeground(Color.white);
+		binButton.setBackground(Color.gray);
+		binButton.setHorizontalAlignment(SwingConstants.LEFT);
 		
+		c.anchor = GridBagConstraints.CENTER;
+		c.insets = new Insets(1, 1, 1, 1);
 		c.gridy = 7;
 		c.gridwidth = 2;
 		mainPanel.add(placeHolderButton, c);
+		setDefaultButtonStyle(placeHolderButton);
 		c.gridx = 2;
 		mainPanel.add(wordButton, c);
+		setDefaultButtonStyle(wordButton);
 		c.gridwidth = 1;
 		c.gridx = 4;
 		mainPanel.add(msButton, c);
+		setDefaultButtonStyle(msButton);
 		c.gridx = 5;
 		mainPanel.add(mButton, c);
+		setDefaultButtonStyle(mButton);
 		
 		c.gridy = 8;
 		c.weighty = .4;
 		c.gridwidth = 1;
 		c.gridx = 0;
 		mainPanel.add(lshButton, c);
+		setDefaultButtonStyle(lshButton);
 		c.gridx = 1;
 		mainPanel.add(rshButton, c);
+		setDefaultButtonStyle(rshButton);
 		c.gridx = 2;
 		mainPanel.add(orButton, c);
+		setDefaultButtonStyle(orButton);
 		c.gridx = 3;
 		mainPanel.add(xOrButton, c);
+		setDefaultButtonStyle(xOrButton);
 		c.gridx = 4;
 		mainPanel.add(notButton, c);
+		setDefaultButtonStyle(notButton);
 		c.gridx = 5;
 		mainPanel.add(andButton, c);
+		setDefaultButtonStyle(andButton);
 		
 		c.gridy = 9;
 		c.gridx = 0;
 		mainPanel.add(secondButton, c);
+		setDefaultButtonStyle(secondButton);
 		c.gridx = 1;
 		mainPanel.add(modButton, c);
+		setDefaultButtonStyle(modButton);
 		c.gridx = 2;
 		mainPanel.add(clearEButton, c);
+		setDefaultButtonStyle(clearEButton);
 		c.gridx = 3;
 		mainPanel.add(clearButton, c);
+		setDefaultButtonStyle(clearButton);
 		c.gridx = 4;
 		mainPanel.add(backButton, c);
+		setDefaultButtonStyle(backButton);
 		c.gridx = 5;
 		mainPanel.add(divButton, c);
+		setDefaultButtonStyle(divButton);
 		
 		c.gridy = 10;
 		c.gridx = 0;
 		mainPanel.add(numAButton, c);
+		setNumberButtonStyle(numAButton);
+		numAButton.setForeground(new Color(45, 45, 45));
 		c.gridx = 1;
 		mainPanel.add(numBButton, c);
+		setNumberButtonStyle(numBButton);
+		numBButton.setForeground(new Color(45, 45, 45));
 		c.gridx = 2;
 		mainPanel.add(num7Button, c);
+		setNumberButtonStyle(num7Button);
 		c.gridx = 3;
 		mainPanel.add(num8Button, c);
+		setNumberButtonStyle(num8Button);
 		c.gridx = 4;
 		mainPanel.add(num9Button, c);
+		setNumberButtonStyle(num9Button);
 		c.gridx = 5;
 		mainPanel.add(multButton, c);
+		setDefaultButtonStyle(multButton);
 		
 		c.gridy = 11;
 		c.gridx = 0;
 		mainPanel.add(numCButton, c);
+		setNumberButtonStyle(numCButton);
+		numCButton.setForeground(new Color(45, 45, 45));
 		c.gridx = 1;
 		mainPanel.add(numDButton, c);
+		setNumberButtonStyle(numDButton);
+		numDButton.setForeground(new Color(45, 45, 45));
 		c.gridx = 2;
 		mainPanel.add(num4Button, c);
+		setNumberButtonStyle(num4Button);
 		c.gridx = 3;
 		mainPanel.add(num5Button, c);
+		setNumberButtonStyle(num5Button);
 		c.gridx = 4;
 		mainPanel.add(num6Button, c);
+		setNumberButtonStyle(num6Button);
 		c.gridx = 5;
 		mainPanel.add(minusButton, c);
+		setDefaultButtonStyle(minusButton);
 		
 		c.gridy = 12;
 		c.gridx = 0;
 		mainPanel.add(numEButton, c);
+		setNumberButtonStyle(numEButton);
+		numEButton.setForeground(new Color(45, 45, 45));
 		c.gridx = 1;
 		mainPanel.add(numFButton, c);
+		setNumberButtonStyle(numFButton);
+		numFButton.setForeground(new Color(45, 45, 45));
 		c.gridx = 2;
 		mainPanel.add(num1Button, c);
+		setNumberButtonStyle(num1Button);
 		c.gridx = 3;
 		mainPanel.add(num2Button, c);
+		setNumberButtonStyle(num2Button);
 		c.gridx = 4;
 		mainPanel.add(num3Button, c);
+		setNumberButtonStyle(num3Button);
 		c.gridx = 5;
 		mainPanel.add(pluseButton, c);
+		setDefaultButtonStyle(pluseButton);
 		
 		c.gridy = 13;
 		c.gridx = 0;
 		mainPanel.add(openParButton, c);
+		setDefaultButtonStyle(openParButton);
 		c.gridx = 1;
 		mainPanel.add(closeParButton, c);
+		setDefaultButtonStyle(closeParButton);
 		c.gridx = 2;
 		mainPanel.add(signButton, c);
+		setDefaultButtonStyle(signButton);
 		c.gridx = 3;
 		mainPanel.add(num0Button, c);
+		setNumberButtonStyle(num0Button);
 		c.gridx = 4;
 		mainPanel.add(periodButton, c);
+		setDefaultButtonStyle(periodButton);
 		c.gridx = 5;
 		mainPanel.add(equalButton, c);
+		setDefaultButtonStyle(equalButton);
 		
 		add(mainPanel, BorderLayout.CENTER);
 		
-		hexLabel.addActionListener(this);
-		decLabel.addActionListener(this);
-		octLabel.addActionListener(this);
-		binLabel.addActionListener(this);
+		hexButton.addActionListener(this);
+		decButton.addActionListener(this);
+		octButton.addActionListener(this);
+		binButton.addActionListener(this);
 		
 		num0Button.addActionListener(this);
 		num1Button.addActionListener(this);
@@ -281,6 +392,101 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		signButton.addActionListener(this);
 		wordButton.addActionListener(this);
 		secondButton.addActionListener(this);
+		
+		menuButton.addMouseListener(this);
+		hexButton.addMouseListener(this);
+		decButton.addMouseListener(this);
+		octButton.addMouseListener(this);
+		binButton.addMouseListener(this);
+	} // end programmerCalculator
+	
+	public void setDefaultButtonStyle(JButton button)
+	{
+		
+		button.setContentAreaFilled(false);
+		button.setFocusPainted(false);
+		button.setBorderPainted(true);
+		button.setOpaque(true);
+		button.setForeground(Color.white);
+		button.setBackground(new Color(45, 45, 45));
+	}
+	
+	public void setNumberButtonStyle(JButton button)
+	{
+		button.setContentAreaFilled(false);
+		button.setFocusPainted(false);
+		button.setBorderPainted(true);
+		button.setOpaque(true);
+		button.setForeground(Color.white);
+		button.setBackground(new Color(15, 15, 15));
+	}
+	
+	public void mouseClicked (MouseEvent e)
+	{
+	}
+	
+	public void mousePressed (MouseEvent e)
+	{
+	}
+	
+	public void mouseEntered (MouseEvent e)
+	{
+		if(e.getSource() == hexButton)
+		{
+			hexButton.setOpaque(true);
+		}
+		
+		if(e.getSource() == decButton)
+		{
+			decButton.setOpaque(true);
+		}
+		
+		if(e.getSource() == octButton)
+		{
+			octButton.setOpaque(true);
+		}
+		
+		if(e.getSource() == binButton)
+		{
+			binButton.setOpaque(true);
+		}
+		
+		if(e.getSource() == menuButton)
+		{
+			menuButton.setOpaque(true);
+		}
+	}
+	
+	public void mouseExited (MouseEvent e)
+	{
+		if(e.getSource() == hexButton)
+		{
+			hexButton.setOpaque(false);
+		}
+		
+		if(e.getSource() == decButton)
+		{
+			decButton.setOpaque(false);
+		}
+		
+		if(e.getSource() == octButton)
+		{
+			octButton.setOpaque(false);
+		}
+		
+		if(e.getSource() == binButton)
+		{
+			binButton.setOpaque(false);
+		}
+		
+		if(e.getSource() == menuButton)
+		{
+			menuButton.setOpaque(false);
+		}
+	}
+	
+	public void mouseReleased (MouseEvent e)
+	{
 	}
 	
 	public void actionPerformed(ActionEvent e)
@@ -518,26 +724,85 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 				activeDataSize = QWORD_SIZE;
 				wordButton.setText("QWORD");
 			}
+			
+			currentValue = dataSizeOverflow(currentValue);
+			displayValue(currentValue);
 		}
 		
-		if(e.getSource() == hexLabel)
+		if(e.getSource() == hexButton)
 		{
 			updateBase(HEXADECIMAL);
+			numFButton.setForeground(Color.white);
+			numEButton.setForeground(Color.white);
+			numDButton.setForeground(Color.white);
+			numCButton.setForeground(Color.white);
+			numBButton.setForeground(Color.white);
+			numAButton.setForeground(Color.white);
+			num9Button.setForeground(Color.white);
+			num8Button.setForeground(Color.white);
+			num7Button.setForeground(Color.white);
+			num6Button.setForeground(Color.white);
+			num5Button.setForeground(Color.white);
+			num4Button.setForeground(Color.white);
+			num3Button.setForeground(Color.white);
+			num2Button.setForeground(Color.white);
 		}
 		
-		if(e.getSource() == decLabel)
+		if(e.getSource() == decButton)
 		{
 			updateBase(DECIMAL);
+			numFButton.setForeground(new Color(45, 45, 45));
+			numEButton.setForeground(new Color(45, 45, 45));
+			numDButton.setForeground(new Color(45, 45, 45));
+			numCButton.setForeground(new Color(45, 45, 45));
+			numBButton.setForeground(new Color(45, 45, 45));
+			numAButton.setForeground(new Color(45, 45, 45));
+			num9Button.setForeground(Color.white);
+			num8Button.setForeground(Color.white);
+			num7Button.setForeground(Color.white);
+			num6Button.setForeground(Color.white);
+			num5Button.setForeground(Color.white);
+			num4Button.setForeground(Color.white);
+			num3Button.setForeground(Color.white);
+			num2Button.setForeground(Color.white);
 		}
 		
-		if(e.getSource() == octLabel)
+		if(e.getSource() == octButton)
 		{
 			updateBase(OCTAL);
+			numFButton.setForeground(new Color(45, 45, 45));
+			numEButton.setForeground(new Color(45, 45, 45));
+			numDButton.setForeground(new Color(45, 45, 45));
+			numCButton.setForeground(new Color(45, 45, 45));
+			numBButton.setForeground(new Color(45, 45, 45));
+			numAButton.setForeground(new Color(45, 45, 45));
+			num9Button.setForeground(new Color(45, 45, 45));
+			num8Button.setForeground(new Color(45, 45, 45));
+			num7Button.setForeground(Color.white);
+			num6Button.setForeground(Color.white);
+			num5Button.setForeground(Color.white);
+			num4Button.setForeground(Color.white);
+			num3Button.setForeground(Color.white);
+			num2Button.setForeground(Color.white);
 		}
 		
-		if(e.getSource() == binLabel)
+		if(e.getSource() == binButton)
 		{
 			updateBase(BINARY);
+			numFButton.setForeground(new Color(45, 45, 45));
+			numEButton.setForeground(new Color(45, 45, 45));
+			numDButton.setForeground(new Color(45, 45, 45));
+			numCButton.setForeground(new Color(45, 45, 45));
+			numBButton.setForeground(new Color(45, 45, 45));
+			numAButton.setForeground(new Color(45, 45, 45));
+			num9Button.setForeground(new Color(45, 45, 45));
+			num8Button.setForeground(new Color(45, 45, 45));
+			num7Button.setForeground(new Color(45, 45, 45));
+			num6Button.setForeground(new Color(45, 45, 45));
+			num5Button.setForeground(new Color(45, 45, 45));
+			num4Button.setForeground(new Color(45, 45, 45));
+			num3Button.setForeground(new Color(45, 45, 45));
+			num2Button.setForeground(new Color(45, 45, 45));
 		}
 		
 		if(e.getSource() == secondButton)
@@ -555,7 +820,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 				rshButton.setText("Rsh");
 			}
 		}
-	}
+	} // end actionPerformed
 	
 	public void updateNumber(String num)
 	{
@@ -578,7 +843,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		
 			numberInserted = true;
 		}
-	}
+	} // end updateNumber
 	
 	public void performOperation(String op)
 	{
@@ -599,19 +864,16 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 		displayEquation.add(' ' + op + ' ');
 		resolveEquation();
 		equationList.get(activeEquation).add(op);
-	}
+	} // end performOperation
 	
 	public void higherOrderOperation()
 	{
 		equationList.add(new ArrayList<String>());
 		activeEquation++;
-	}
+	} // end higherOrderOperation
 	
 	public void updateBase(int newBase)
 	{
-		currentValue = baseConversion(currentValue, activeBase, newBase);
-		answerLabel.setText(dataSizeOverflow(currentValue));
-		
 		equationLabel.setText("");
 		for(int i = 0; i < displayEquation.size(); i++)
 		{
@@ -623,13 +885,10 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			equationLabel.setText(equationLabel.getText() + displayEquation.get(i));
 		}
 		
-		if(!beginNewNumber)
-		{
-			equationLabel.setText(equationLabel.getText() + currentValue);
-		}
-		
+		currentValue = baseConversion(currentValue, activeBase, newBase);
 		activeBase = newBase;
-	}
+		answerLabel.setText(formatForDisplay(currentValue, activeBase));
+	} // end updateBase
 	
 	public String baseConversion(String value, int fromBase, int toBase)
 	{
@@ -638,7 +897,7 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			return value;
 		}
 		return Long.toString(Long.parseLong(value, fromBase), toBase).toUpperCase();
-	}
+	} // end BaseConversion
 	
 	public void resolveEquation()
 	{
@@ -738,10 +997,10 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 	public void displayValue(String value)
 	{
 		answerLabel.setText(formatForDisplay(value, activeBase));
-		hexLabel.setText("HEX " + formatForDisplay(value, HEXADECIMAL));
-		decLabel.setText("DEC " + formatForDisplay(value, DECIMAL));
-		octLabel.setText("OCT " + formatForDisplay(value, OCTAL));
-		binLabel.setText("BIN " + formatForDisplay(value, BINARY));
+		hexButton.setText("HEX   " + formatForDisplay(value, HEXADECIMAL));
+		decButton.setText("DEC   " + formatForDisplay(value, DECIMAL));
+		octButton.setText("OCT   " + formatForDisplay(value, OCTAL));
+		binButton.setText("BIN    " + formatForDisplay(value, BINARY));
 	}
 	
 	public String formatForDisplay(String value, int toBase)
@@ -762,8 +1021,10 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 				if(i % 3 == commaOffset)
 					value = value.substring(0,i) + "," + value.substring(i);
 			}
+			
 			value = negate + value;
-		}
+		} // end if(toBase == DECIMAL)
+		
 		else if(toBase == HEXADECIMAL || toBase == BINARY)
 		{
 			if(negate == "-")
@@ -778,11 +1039,12 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 			for(int i = value.length() - 1; i > 0; i--)
 			{
 				if(i % 4 == spaceOffset)
-					value = value.substring(0,i) + " " + value.substring(i);
+					value = value.substring(0, i) + " " + value.substring(i);
 			}
 			
 			value = value.toUpperCase();
-		}
+		} // end if(toBase == HEXADECIMAL || BINARY)
+		
 		else if(toBase == OCTAL)
 		{
 			if(negate == "-")
@@ -799,10 +1061,8 @@ public class ProgrammerCalc extends JFrame implements ActionListener
 				if(i % 3 == spaceOffset)
 					value = value.substring(0,i) + " " + value.substring(i);
 			}
-			
-			value = value.toUpperCase();
-		}
+		} // end if(toBase == Octal)
 		
 		return value;
-	}
+	} // end formatForDisplay
 }
